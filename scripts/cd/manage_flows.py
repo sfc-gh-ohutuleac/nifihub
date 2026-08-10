@@ -93,7 +93,7 @@ def resolve_version(registry_client_id, bucket_id, flow_id, version_spec):
         key=lambda s: s.versioned_flow_snapshot_metadata.timestamp,
     )
     version = latest.versioned_flow_snapshot_metadata.version
-    print(f"[flow] Resolved 'latest' -> '{version}' for {bucket_id}/{flow_id}")
+    print(f"[flow] Resolved 'latest' -> '{version}' for {bucket_id}/{flow_id}", file=sys.stderr)
     return version
 
 
