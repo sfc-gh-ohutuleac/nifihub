@@ -29,7 +29,7 @@
         "properties": {
           "File Size": "0B",
           "Batch Size": "1",
-          "Unique FlowFiles": "true",
+          "Unique FlowFiles": "false",
           "Mime Type": "application/json",
           "Custom Text": "{\"message\": \"Hello from NiFi Hub\", \"source\": \"GenerateFlowFile\", \"timestamp\": \"${now():format('yyyy-MM-dd HH:mm:ss')}\"}",
           "Character Set": "UTF-8",
@@ -197,8 +197,8 @@
           "Schema Name": "${schema.name}",
           "Table Name": "${table.name}",
           "Translate Field Names": "true",
-          "Unmatched Field Behavior": "IGNORE_UNMATCHED_FIELD",
-          "Unmatched Column Behavior": "IGNORE_UNMATCHED_COLUMN",
+          "Unmatched Field Behavior": "Ignore Unmatched Fields",
+          "Unmatched Column Behavior": "Ignore Unmatched Columns",
           "Quote Column Identifiers": "false",
           "Quote Table Identifiers": "false",
           "Max Wait Time": "0 seconds",
@@ -314,7 +314,9 @@
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
         "autoTerminatedRelationships": [
-          "success"
+          "success",
+          "failure",
+          "retry"
         ],
         "scheduledState": "ENABLED",
         "retryCount": 10,
@@ -465,44 +467,68 @@
         "instanceIdentifier": "5b1f8295-019d-1000-ffff-ffffe35f0002",
         "name": "SnowflakeDBCPService",
         "comments": "Snowflake connection pool for the Openflow runtime",
-        "type": "org.apache.nifi.dbcp.snowflake.SnowflakeDBCPService",
+        "type": "org.apache.nifi.dbcp.DBCPConnectionPool",
         "bundle": {
           "group": "org.apache.nifi",
-          "artifact": "nifi-snowflake-services-nar",
+          "artifact": "nifi-dbcp-service-nar",
           "version": "2.8.0"
         },
         "properties": {
-          "Database": "OPENFLOW",
-          "Schema": "OPENFLOW",
-          "Warehouse": "OPENFLOW_WH",
-          "snowflake-auth-service": "openflow-auth"
+          "Database Connection URL": "jdbc:snowflake://${SNOWFLAKE_ACCOUNT_URL}/?db=OPENFLOW&schema=OPENFLOW&warehouse=OPENFLOW_WH",
+          "Database Driver Class Name": "net.snowflake.client.jdbc.SnowflakeDriver",
+          "database-driver-locations": null,
+          "Database User": null,
+          "Password": null,
+          "Max Wait Time": "500 millis",
+          "Max Total Connections": "8"
         },
         "propertyDescriptors": {
-          "Database": {
-            "name": "Database",
-            "displayName": "Database",
+          "Database Connection URL": {
+            "name": "Database Connection URL",
+            "displayName": "Database Connection URL",
             "identifiesControllerService": false,
             "sensitive": false,
             "dynamic": false
           },
-          "Schema": {
-            "name": "Schema",
-            "displayName": "Schema",
+          "Database Driver Class Name": {
+            "name": "Database Driver Class Name",
+            "displayName": "Database Driver Class Name",
             "identifiesControllerService": false,
             "sensitive": false,
             "dynamic": false
           },
-          "Warehouse": {
-            "name": "Warehouse",
-            "displayName": "Warehouse",
+          "database-driver-locations": {
+            "name": "database-driver-locations",
+            "displayName": "Database Driver Location(s)",
             "identifiesControllerService": false,
             "sensitive": false,
             "dynamic": false
           },
-          "snowflake-auth-service": {
-            "name": "snowflake-auth-service",
-            "displayName": "Snowflake Auth Service",
-            "identifiesControllerService": true,
+          "Database User": {
+            "name": "Database User",
+            "displayName": "Database User",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Password": {
+            "name": "Password",
+            "displayName": "Password",
+            "identifiesControllerService": false,
+            "sensitive": true,
+            "dynamic": false
+          },
+          "Max Wait Time": {
+            "name": "Max Wait Time",
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Max Total Connections": {
+            "name": "Max Total Connections",
+            "displayName": "Max Total Connections",
+            "identifiesControllerService": false,
             "sensitive": false,
             "dynamic": false
           }
@@ -517,7 +543,7 @@
             }
           }
         ],
-        "scheduledState": "ENABLED",
+        "scheduledState": "DISABLED",
         "bulletinLevel": "WARN",
         "componentType": "CONTROLLER_SERVICE",
         "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
