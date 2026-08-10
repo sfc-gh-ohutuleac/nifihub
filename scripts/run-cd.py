@@ -130,6 +130,12 @@ def main():
             print("[run-cd] Done (dry run).", file=sys.stderr)
             return
 
+        # Always print the changes before applying
+        print("[run-cd] Changes to be applied:", file=sys.stderr)
+        with open(changes) as f:
+            change_data = json.load(f)
+        print(json.dumps(change_data, indent=2), file=sys.stderr)
+
         # Step 4: Apply changes
         print("[run-cd] Step 4/4: Applying changes...", file=sys.stderr)
         _run(

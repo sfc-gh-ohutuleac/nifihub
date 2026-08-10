@@ -228,6 +228,12 @@ def diff_nifi_flows(live_flows, desired_flows):
         if desired_version and desired_version != "latest":
             if _norm(live.get("version", "")) != _norm(desired_version):
                 changes["version"] = {"live": live.get("version"), "desired": desired_version}
+        elif desired_version == "latest":
+            # When version is "latest", detect updates via NiFi's version control state.
+            # A state of STALE or SYNC_FAILURE means a newer version exists in the registry.
+            vci_state = (live.get("state") or "").upper()
+            if vci_state in ("STALE", "SYNC_FAILURE"):
+                changes["version"] = {"live": live.get("version"), "desired": "latest"}
         live_running = live.get("running", False)
         desired_start = desired.get("start", False)
         if live_running != desired_start:
