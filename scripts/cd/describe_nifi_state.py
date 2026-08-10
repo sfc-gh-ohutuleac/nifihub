@@ -19,7 +19,7 @@ import sys
 
 import nipyapi
 
-from manage_flows import configure_nifi, list_process_groups
+from manage_flows import configure_nifi, list_process_groups, resolve_version
 from manage_controller_services import list_controller_services, list_root_pg_controller_services
 from setup_registry_client import list_registry_clients
 import manage_parameter_providers  # noqa: F401 — triggers monkey patch
@@ -81,6 +81,7 @@ def describe_nifi_state(runtime_url, pat=None, nifi_auth=None):
 
     registries = list_registry_clients()
     reg_id_map = _registry_id_to_name(registries)
+    reg_name_to_id = {rc.component.name: rc.id for rc in registries}
 
     cs_list = list_controller_services()
     controller_services = []
@@ -134,6 +135,18 @@ def describe_nifi_state(runtime_url, pat=None, nifi_auth=None):
             flow_entry["flow"] = vci.flow_id or vci.flow_name or ""
             flow_entry["version"] = vci.version or ""
             flow_entry["state"] = vci.state or ""
+            # Query registry for the actual latest version available
+            try:
+                latest = resolve_version(
+                    vci.registry_id,
+                    flow_entry["bucket"],
+                    flow_entry["flow"],
+                    "latest",
+                )
+                flow_entry["latest_version"] = latest
+            except Exception as e:
+                print(f"[nifi] Could not resolve latest version for '{pg.component.name}': {e}", file=sys.stderr)
+                flow_entry["latest_version"] = ""
         else:
             flow_entry["registry"] = ""
             flow_entry["bucket"] = ""
