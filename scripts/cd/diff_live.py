@@ -229,11 +229,11 @@ def diff_nifi_flows(live_flows, desired_flows):
             if _norm(live.get("version", "")) != _norm(desired_version):
                 changes["version"] = {"live": live.get("version"), "desired": desired_version}
         elif desired_version == "latest":
-            # When version is "latest", detect updates via NiFi's version control state.
-            # A state of STALE or SYNC_FAILURE means a newer version exists in the registry.
-            vci_state = (live.get("state") or "").upper()
-            if vci_state in ("STALE", "SYNC_FAILURE"):
-                changes["version"] = {"live": live.get("version"), "desired": "latest"}
+            # Compare the deployed version against the actual latest in the registry
+            latest_available = live.get("latest_version", "")
+            deployed_version = live.get("version", "")
+            if latest_available and deployed_version and _norm(deployed_version) != _norm(latest_available):
+                changes["version"] = {"live": deployed_version, "desired": latest_available}
         live_running = live.get("running", False)
         desired_start = desired.get("start", False)
         if live_running != desired_start:
@@ -542,7 +542,10 @@ def diff_live(live_state, config_path):
 
         for rt_name_upper, live_rt in live_runtimes.items():
             if rt_name_upper not in desired_rt_names:
-                rt_results["to_delete"].append(live_rt)
+                # Do not delete runtimes that are not declared in config.
+                # Treat config as additive — only manage what's explicitly listed.
+                print(f"[diff] Skipping unmanaged runtime '{live_rt.get('name', rt_name_upper)}' "
+                      f"(not in config, will not be deleted)", file=sys.stderr)
 
         has_dep_changes = (
             dep_changes
