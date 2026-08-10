@@ -1,0 +1,543 @@
+{
+  "flowContents": {
+    "identifier": "example-flow-to-snowflake",
+    "instanceIdentifier": "2a8f8295-019d-1000-ffff-ffffe25f00d4",
+    "name": "Example Flow to Snowflake",
+    "comments": "Generates FlowFiles every 1 minute, maps attributes to columns, and writes to OPENFLOW.OPENFLOW.EXAMPLE_FLOW table.",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "processGroups": [],
+    "remoteProcessGroups": [],
+    "processors": [
+      {
+        "identifier": "gen-flowfile-001",
+        "instanceIdentifier": "3a9061c7-019d-1000-0000-000001aef001",
+        "name": "GenerateFlowFile",
+        "comments": "Generates a sample record every 1 minute",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "type": "org.apache.nifi.processors.standard.GenerateFlowFile",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.8.0"
+        },
+        "properties": {
+          "File Size": "0B",
+          "Batch Size": "1",
+          "Unique FlowFiles": "true",
+          "Mime Type": "application/json",
+          "Custom Text": "{\"message\": \"Hello from NiFi Hub\", \"source\": \"GenerateFlowFile\", \"timestamp\": \"${now():format('yyyy-MM-dd HH:mm:ss')}\"}",
+          "Character Set": "UTF-8",
+          "Data Format": "Text"
+        },
+        "propertyDescriptors": {
+          "File Size": {
+            "name": "File Size",
+            "displayName": "File Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Batch Size": {
+            "name": "Batch Size",
+            "displayName": "Batch Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Unique FlowFiles": {
+            "name": "Unique FlowFiles",
+            "displayName": "Unique FlowFiles",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Mime Type": {
+            "name": "Mime Type",
+            "displayName": "Mime Type",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Custom Text": {
+            "name": "Custom Text",
+            "displayName": "Custom Text",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Character Set": {
+            "name": "Character Set",
+            "displayName": "Character Set",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Data Format": {
+            "name": "Data Format",
+            "displayName": "Data Format",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "1 min",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      },
+      {
+        "identifier": "update-attr-002",
+        "instanceIdentifier": "3b3cff13-019d-1000-0000-000062a83002",
+        "name": "MapAttributesToColumns",
+        "comments": "Maps FlowFile attributes to Snowflake column names",
+        "position": {
+          "x": 0,
+          "y": 200
+        },
+        "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-update-attribute-nar",
+          "version": "2.8.0"
+        },
+        "properties": {
+          "db.name": "OPENFLOW",
+          "schema.name": "OPENFLOW",
+          "table.name": "EXAMPLE_FLOW",
+          "record.count": "1"
+        },
+        "propertyDescriptors": {
+          "db.name": {
+            "name": "db.name",
+            "displayName": "db.name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": true
+          },
+          "schema.name": {
+            "name": "schema.name",
+            "displayName": "schema.name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": true
+          },
+          "table.name": {
+            "name": "table.name",
+            "displayName": "table.name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": true
+          },
+          "record.count": {
+            "name": "record.count",
+            "displayName": "record.count",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": true
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      },
+      {
+        "identifier": "put-db-record-003",
+        "instanceIdentifier": "3c2fa2ea-661a-32aa-bc69-1f571300f003",
+        "name": "PutDatabaseRecord",
+        "comments": "Writes records to OPENFLOW.OPENFLOW.EXAMPLE_FLOW table in Snowflake",
+        "position": {
+          "x": 0,
+          "y": 400
+        },
+        "type": "org.apache.nifi.processors.standard.PutDatabaseRecord",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.8.0"
+        },
+        "properties": {
+          "Record Reader": "json-reader",
+          "Statement Type": "INSERT",
+          "Database Type": "Generic",
+          "Database Connection Pooling Service": "snowflake-dbcp",
+          "Catalog Name": null,
+          "Schema Name": "${schema.name}",
+          "Table Name": "${table.name}",
+          "Translate Field Names": "true",
+          "Unmatched Field Behavior": "IGNORE_UNMATCHED_FIELD",
+          "Unmatched Column Behavior": "IGNORE_UNMATCHED_COLUMN",
+          "Quote Column Identifiers": "false",
+          "Quote Table Identifiers": "false",
+          "Max Wait Time": "0 seconds",
+          "Rollback On Failure": "false"
+        },
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "identifiesControllerService": true,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Statement Type": {
+            "name": "Statement Type",
+            "displayName": "Statement Type",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Database Type": {
+            "name": "Database Type",
+            "displayName": "Database Type",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Database Connection Pooling Service": {
+            "name": "Database Connection Pooling Service",
+            "displayName": "Database Connection Pooling Service",
+            "identifiesControllerService": true,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Catalog Name": {
+            "name": "Catalog Name",
+            "displayName": "Catalog Name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Schema Name": {
+            "name": "Schema Name",
+            "displayName": "Schema Name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Table Name": {
+            "name": "Table Name",
+            "displayName": "Table Name",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Translate Field Names": {
+            "name": "Translate Field Names",
+            "displayName": "Translate Field Names",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Unmatched Field Behavior": {
+            "name": "Unmatched Field Behavior",
+            "displayName": "Unmatched Field Behavior",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Unmatched Column Behavior": {
+            "name": "Unmatched Column Behavior",
+            "displayName": "Unmatched Column Behavior",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Quote Column Identifiers": {
+            "name": "Quote Column Identifiers",
+            "displayName": "Quote Column Identifiers",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Quote Table Identifiers": {
+            "name": "Quote Table Identifiers",
+            "displayName": "Quote Table Identifiers",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Max Wait Time": {
+            "name": "Max Wait Time",
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Rollback On Failure": {
+            "name": "Rollback On Failure",
+            "displayName": "Rollback On Failure",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [
+          "failure"
+        ],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      }
+    ],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [
+      {
+        "identifier": "conn-gen-to-attr-001",
+        "instanceIdentifier": "4a907075-019d-1000-ffff-ffff9992b001",
+        "name": "",
+        "source": {
+          "id": "gen-flowfile-001",
+          "type": "PROCESSOR",
+          "groupId": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6",
+          "name": "GenerateFlowFile",
+          "comments": "Generates a sample record every 1 minute",
+          "instanceIdentifier": "3a9061c7-019d-1000-0000-000001aef001"
+        },
+        "destination": {
+          "id": "update-attr-002",
+          "type": "PROCESSOR",
+          "groupId": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6",
+          "name": "MapAttributesToColumns",
+          "comments": "Maps FlowFile attributes to Snowflake column names",
+          "instanceIdentifier": "3b3cff13-019d-1000-0000-000062a83002"
+        },
+        "labelIndex": 0,
+        "zIndex": 1,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      },
+      {
+        "identifier": "conn-attr-to-put-002",
+        "instanceIdentifier": "4b3d3683-019d-1000-0000-000057384002",
+        "name": "",
+        "source": {
+          "id": "update-attr-002",
+          "type": "PROCESSOR",
+          "groupId": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6",
+          "name": "MapAttributesToColumns",
+          "comments": "Maps FlowFile attributes to Snowflake column names",
+          "instanceIdentifier": "3b3cff13-019d-1000-0000-000062a83002"
+        },
+        "destination": {
+          "id": "put-db-record-003",
+          "type": "PROCESSOR",
+          "groupId": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6",
+          "name": "PutDatabaseRecord",
+          "comments": "Writes records to OPENFLOW.OPENFLOW.EXAMPLE_FLOW table in Snowflake",
+          "instanceIdentifier": "3c2fa2ea-661a-32aa-bc69-1f571300f003"
+        },
+        "labelIndex": 0,
+        "zIndex": 2,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      }
+    ],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [
+      {
+        "identifier": "json-reader",
+        "instanceIdentifier": "5a1f8295-019d-1000-ffff-ffffe35f0001",
+        "name": "JsonTreeReader",
+        "comments": "Reads JSON content from FlowFiles",
+        "type": "org.apache.nifi.json.JsonTreeReader",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.8.0"
+        },
+        "properties": {
+          "Date Format": null,
+          "Time Format": null,
+          "Timestamp Format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "propertyDescriptors": {
+          "Date Format": {
+            "name": "Date Format",
+            "displayName": "Date Format",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Time Format": {
+            "name": "Time Format",
+            "displayName": "Time Format",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Timestamp Format": {
+            "name": "Timestamp Format",
+            "displayName": "Timestamp Format",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.serialization.RecordReaderFactory",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.8.0"
+            }
+          }
+        ],
+        "scheduledState": "ENABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      },
+      {
+        "identifier": "snowflake-dbcp",
+        "instanceIdentifier": "5b1f8295-019d-1000-ffff-ffffe35f0002",
+        "name": "SnowflakeDBCPService",
+        "comments": "Snowflake connection pool for the Openflow runtime",
+        "type": "org.apache.nifi.dbcp.snowflake.SnowflakeDBCPService",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-snowflake-services-nar",
+          "version": "2.8.0"
+        },
+        "properties": {
+          "Database": "OPENFLOW",
+          "Schema": "OPENFLOW",
+          "Warehouse": "OPENFLOW_WH",
+          "snowflake-auth-service": "openflow-auth"
+        },
+        "propertyDescriptors": {
+          "Database": {
+            "name": "Database",
+            "displayName": "Database",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Schema": {
+            "name": "Schema",
+            "displayName": "Schema",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Warehouse": {
+            "name": "Warehouse",
+            "displayName": "Warehouse",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "snowflake-auth-service": {
+            "name": "snowflake-auth-service",
+            "displayName": "Snowflake Auth Service",
+            "identifiesControllerService": true,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.dbcp.DBCPService",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.8.0"
+            }
+          }
+        ],
+        "scheduledState": "ENABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "4b997b6a-f6e4-3d38-96fd-7098ecefadf6"
+      }
+    ],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP"
+  },
+  "snapshotMetadata": {
+    "bucketIdentifier": "examples",
+    "flowIdentifier": "example-flow-to-snowflake",
+    "version": 1,
+    "comments": "Generates FlowFiles, maps attributes, writes to Snowflake table."
+  }
+}

@@ -1,15 +1,15 @@
 # yaml-language-server: $schema=../schema.json
 account:
-  name: hello-world
-  github_environment: hello-world
+  name: nifihub
+  github_environment: dev
 
 deployments:
   - name: NIFIHUB_DEPLOYMENT
     deployment_type: SNOWFLAKE
-    display_name: "CICD NiFi Hub Deployment"
-    comment: "Hello World deployment"
+    display_name: "NiFi Hub Deployment"
+    comment: "NiFi Hub Deployment"
     runtimes:
-      - name: NIFIHUB_RUNTIME
+      - name: NIFIHUB_RUNTIME_DEV
         database: OPENFLOW
         schema: OPENFLOW
         node_type: SMALL
@@ -17,8 +17,8 @@ deployments:
         max_nodes: 1
         suspend: false
         execute_as_role: OPENFLOW_ADMIN
-        display_name: "Hello World Runtime"
-        comment: "Minimal runtime for hello-world flow"
+        display_name: "DEV Runtime"
+        comment: "DEV Minimal runtime for hello-world flow"
         flow_registries:
           - name: nifihub
             type: org.apache.nifi.github.GitHubFlowRegistryClient
@@ -30,9 +30,9 @@ deployments:
               Default Branch: dev
               Repository Path: flows
         flows:
-          - name: "Hello World"
-            registry: nifihub
-            bucket: examples
-            flow: hello-world-example
-            version: latest
-            start: true
+        - name: "Example Flow to Snowflake"
+          registry: nifihub
+          bucket: examples
+          flow: example-flow-to-snowflake
+          version: latest
+          start: true
