@@ -24,6 +24,23 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Snowflake CLI
+        uses: Snowflake-Labs/snowflake-cli-action@v1
+        with:
+          default-config-file-path: ''
+
+      - name: Configure Snowflake connection
+        run: |
+          mkdir -p ~/.snowflake
+          cat > ~/.snowflake/config.toml << 'EOF'
+          [connections.default]
+          account = "${{ vars.SNOWFLAKE_ACCOUNT }}"
+          user = "${{ vars.SNOWFLAKE_USER }}"
+          authenticator = "oauth"
+          token = "${{ secrets.SNOWFLAKE_PAT }}"
+          role = "${{ vars.SNOWFLAKE_ROLE }}"
+          EOF
+
       - name: Install dependencies
         run: pip install -r scripts/cd/requirements-cd.txt
 
