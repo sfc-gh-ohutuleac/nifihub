@@ -3,7 +3,7 @@
     "identifier": "57a25c67-fd7c-331f-9476-a62d2d4b2c28",
     "instanceIdentifier": "ec6fccbe-019f-1000-0000-00002234871c",
     "name": "example-flow-to-snowflake",
-    "comments": "NEW Generates FlowFiles every 1 minute, maps attributes to columns, and writes to OPENFLOW.OPENFLOW.EXAMPLE_FLOW table.",
+    "comments": "Generates FlowFiles every 1 minute, maps attributes to columns, and writes to OPENFLOW.OPENFLOW.EXAMPLE_FLOW table.",
     "position": {
       "x": 0,
       "y": 0
