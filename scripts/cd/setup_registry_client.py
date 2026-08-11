@@ -54,6 +54,7 @@ def _resolve_type(type_override):
 
 
 def create_registry_client(name, properties, type_override=None):
+    print(f"[registry] Creating flow registry client '{name}'...", file=sys.stderr)
     api = nipyapi.nifi.ControllerApi()
     client_type = _resolve_type(type_override)
 
@@ -73,6 +74,7 @@ def create_registry_client(name, properties, type_override=None):
 
 
 def delete_registry_client(existing):
+    print(f"[registry] Deleting flow registry client...", file=sys.stderr)
     api = nipyapi.nifi.ControllerApi()
     print(f"[registry] Deleting Flow Registry Client '{existing.component.name}' (id={existing.id})...")
     api.delete_flow_registry_client(
@@ -83,6 +85,7 @@ def delete_registry_client(existing):
 
 
 def update_registry_client(existing, properties):
+    print(f"[registry] Updating flow registry client properties...", file=sys.stderr)
     api = nipyapi.nifi.ControllerApi()
     full_props = {k: None for k in (existing.component.properties or {})}
     full_props.update(properties)
@@ -111,6 +114,7 @@ def setup(name, properties, runtime_url, nifi_pat, type_override=None, nifi_auth
         type_override: Optional fully-qualified Java type. Auto-detected if None.
         nifi_auth: Optional nifi_auth dict for username/password auth.
     """
+    print(f"[registry] Setting up flow registry client '{name}'...", file=sys.stderr)
     _configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     desired_type = _resolve_type(type_override)
     existing = find_registry_client(name)

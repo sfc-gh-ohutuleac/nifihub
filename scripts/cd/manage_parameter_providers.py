@@ -130,6 +130,7 @@ def _apply(provider_id, sensitive_pattern):
 
 
 def reconcile_parameter_provider(pp_spec):
+    print(f"[provider] Reconciling parameter provider...", file=sys.stderr)
     name = pp_spec["name"]
     type_str = pp_spec["type"]
     sensitive_pattern = pp_spec.get("sensitive_param_pattern", ".*")
@@ -151,6 +152,7 @@ def reconcile_parameter_provider(pp_spec):
 
 
 def reconcile_parameter_providers(pp_specs, runtime_url, nifi_pat, nifi_auth=None):
+    print(f"[provider] Reconciling {len(pp_specs)} parameter provider(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     all_context_names = []
     for pp_spec in pp_specs:
@@ -172,6 +174,7 @@ def fetch_auto_provisioned_provider(sensitive_pattern=".*"):
 
     Returns list of parameter context names created by the provider.
     """
+    print(f"[provider] Fetching auto-provisioned Snowflake parameter provider...", file=sys.stderr)
     pp = find_parameter_provider(AUTO_PROVISIONED_PROVIDER_NAME)
     if not pp:
         print(f"[pp] Auto-provisioned provider '{AUTO_PROVISIONED_PROVIDER_NAME}' not found — skipping")
@@ -182,6 +185,7 @@ def fetch_auto_provisioned_provider(sensitive_pattern=".*"):
 
 
 def delete_parameter_providers(pp_specs, runtime_url, nifi_pat, nifi_auth=None):
+    print(f"[provider] Deleting {len(pp_specs)} parameter provider(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     api = nipyapi.nifi.ParameterProvidersApi()
     for pp_spec in pp_specs:

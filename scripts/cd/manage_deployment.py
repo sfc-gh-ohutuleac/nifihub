@@ -57,6 +57,7 @@ def snow_sql(sql, account_url, pat, user, role, timeout=300):
 
 
 def create_deployment(name, deployment_type, display_name=None, comment=None, **kwargs):
+    print(f"[deployment] Creating deployment '{name}'...", file=sys.stderr)
     sql = f"CREATE OPENFLOW DEPLOYMENT {name} DEPLOYMENT_TYPE = {deployment_type}"
     if display_name:
         sql += f" DISPLAY_NAME = '{display_name}'"
@@ -81,6 +82,7 @@ def create_deployment(name, deployment_type, display_name=None, comment=None, **
 
 
 def alter_deployment(name, changed_fields, **kwargs):
+    print(f"[deployment] Altering deployment '{name}'...", file=sys.stderr)
     set_clauses = []
     for field in ("display_name", "comment"):
         if field in changed_fields:
@@ -135,6 +137,7 @@ def drop_deployment(name, **kwargs):
 
 
 def delete_deployment(name, **kwargs):
+    print(f"[deployment] Deleting deployment '{name}'...", file=sys.stderr)
     terminate_deployment(name, **kwargs)
     drop_deployment(name, **kwargs)
 

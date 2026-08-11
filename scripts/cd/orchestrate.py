@@ -209,6 +209,9 @@ def _delete_parameter_providers(providers, runtime_url, nifi_auth=None):
 
 def _setup_flow_registries(rt, runtime_url):
     """Provision all Flow Registry Clients declared on a runtime."""
+    registries = rt.get("flow_registries", [])
+    if registries:
+        print(f"[orchestrate] Setting up {len(registries)} flow registry client(s) on '{rt['name']}'...", file=sys.stderr)
     nifi_pat = _get_nifi_pat()
     nifi_auth = _get_nifi_auth(rt)
     for rc in rt.get("flow_registries", []):
@@ -246,6 +249,7 @@ def _reconcile_flows(rt, runtime_url, provider_context_names=None):
     flows = rt.get("flows", [])
     if not flows:
         return
+    print(f"[orchestrate] Reconciling {len(flows)} flow(s) on '{rt['name']}'...", file=sys.stderr)
     nifi_pat = _get_nifi_pat()
     nifi_auth = _get_nifi_auth(rt)
     default_reg = _default_registry(rt)
@@ -435,6 +439,7 @@ def apply_deployment_creates(created_deps, conn, errors):
 
 
 def apply_runtime_create(deployment_name, rt, conn):
+    print(f"[orchestrate] Creating runtime '{rt['name']}' in deployment '{deployment_name}'...", file=sys.stderr)
     database = rt["database"]
     schema = rt["schema"]
 
@@ -555,6 +560,7 @@ def apply_deployment_modifications(modified_deps, conn, errors):
 
 def apply_runtime_modification(mod, conn):
     rt = mod["new"]
+    print(f"[orchestrate] Modifying runtime '{rt['name']}'...", file=sys.stderr)
     database = rt["database"]
     schema = rt["schema"]
     som = _has_som_api(rt)
@@ -679,6 +685,11 @@ def orchestrate(changes_path, config_path):
     conn = get_conn()
     deployments = changes.get("deployments", {})
     errors = []
+
+    n_create = len(deployments.get("created", []))
+    n_modify = len(deployments.get("modified", []))
+    n_delete = len(deployments.get("deleted", []))
+    print(f"[orchestrate] Applying changes: {n_create} deployment(s) to create, {n_modify} to modify, {n_delete} to delete", file=sys.stderr)
 
     apply_deployment_creates(deployments.get("created", []), conn, errors)
     apply_deployment_modifications(deployments.get("modified", []), conn, errors)

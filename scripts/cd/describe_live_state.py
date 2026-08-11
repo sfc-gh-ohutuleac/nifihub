@@ -202,9 +202,11 @@ def build_live_state(config_path, conn):
     with open(config_path) as f:
         config = yaml.safe_load(f) or {}
 
+    print(f"[describe] Listing deployments, runtimes, and connectors from Snowflake...", file=sys.stderr)
     all_live_deployments = list_deployments(conn)
     all_live_runtimes = list_runtimes(conn)
     all_live_connectors = list_connectors(conn)
+    print(f"[describe] Found {len(all_live_deployments)} deployment(s), {len(all_live_runtimes)} runtime(s), {len(all_live_connectors)} connector(s)", file=sys.stderr)
 
     live_state = {"deployments": []}
 
@@ -379,10 +381,12 @@ def main():
         sys.exit(1)
 
     config_path = sys.argv[1]
+    print(f"[describe] Querying live state for config: {config_path}", file=sys.stderr)
     conn = _conn()
     state = build_live_state(config_path, conn)
     json.dump(state, sys.stdout, indent=2)
     print()
+    print(f"[describe] Done — found {len(state.get('deployments', []))} deployment(s)", file=sys.stderr)
 
 
 if __name__ == "__main__":
