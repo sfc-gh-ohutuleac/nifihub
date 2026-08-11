@@ -124,6 +124,7 @@ def main(output_path=None):
             items.append({"config_env": config_env, "github_env": github_env})
 
     has_changes = len(items) > 0
+    print(f"[detect] Found {len(items)} changed environment(s): {[i['config_env'] for i in items]}", file=sys.stderr)
 
     lines = [
         f"has_changes={'true' if has_changes else 'false'}",

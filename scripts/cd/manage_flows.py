@@ -115,8 +115,7 @@ def find_flow_pg_by_name(pg_name, parent_id=None):
 def import_flow(registry_client_id, bucket, flow_name, version, pg_name, parent_id=None, dedicated_parameter_context=False):
     if parent_id is None:
         parent_id = get_root_pg_id()
-
-    position = nipyapi.layout.suggest_pg_position(parent_id)
+    print(f"[flow] Importing flow '{flow_name}' (version '{version}') as '{pg_name}'...", file=sys.stderr)
 
     api = nipyapi.nifi.ProcessGroupsApi()
 
@@ -223,6 +222,7 @@ def delete_flow(pg_entity):
 
 def reconcile_flows(flows, registry_client_name, runtime_url, nifi_pat, nifi_auth=None):
     """Idempotent reconcile: create missing PGs, update version-mismatched PGs, skip up-to-date ones."""
+    print(f"[flow] Reconciling {len(flows)} flow(s) via registry '{registry_client_name}'...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
 
     rc = find_registry_client(registry_client_name)
@@ -283,6 +283,7 @@ def stop_flow(pg_id, pg_name=""):
 
 def delete_flows(flows, registry_client_name, runtime_url, nifi_pat, nifi_auth=None):
     """Delete process groups for flows that were removed from config."""
+    print(f"[flow] Deleting {len(flows)} removed flow(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
 
     for flow_spec in flows:
