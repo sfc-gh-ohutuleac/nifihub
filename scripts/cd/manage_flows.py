@@ -117,6 +117,8 @@ def import_flow(registry_client_id, bucket, flow_name, version, pg_name, parent_
         parent_id = get_root_pg_id()
     print(f"[flow] Importing flow '{flow_name}' (version '{version}') as '{pg_name}'...", file=sys.stderr)
 
+    position = nipyapi.layout.suggest_pg_position(parent_id)
+
     api = nipyapi.nifi.ProcessGroupsApi()
 
     body = nipyapi.nifi.ProcessGroupEntity(
