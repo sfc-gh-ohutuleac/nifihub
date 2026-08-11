@@ -1,0 +1,53 @@
+name: Snowflake Flow Diff
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [dev, qua, prd]
+    paths: ['flows/**/*.json']
+
+jobs:
+  flow-diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          path: submitted-changes
+
+      - name: Get changed files
+        id: files
+        run: |
+          cd submitted-changes
+          files=$(git diff --name-only \
+            $(git merge-base HEAD origin/${{ github.event.pull_request.base.ref }}) \
+            HEAD | grep 'flows/.*\.json$' || true)
+          if [ -z "$files" ]; then
+            echo "flowA=" >> $GITHUB_OUTPUT
+            echo "flowB=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          bare=$(echo "$files" | tr '\n' ',' | sed 's/,$//')
+          echo "flowA=$(echo "$bare" | sed 's|[^,]\+|original-code/&|g')" >> $GITHUB_OUTPUT
+          echo "flowB=$(echo "$bare" | sed 's|[^,]\+|submitted-changes/&|g')" >> $GITHUB_OUTPUT
+
+      - name: Checkout base code
+        if: steps.files.outputs.flowB != ''
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 2
+          path: original-code
+
+      - name: Snowflake Flow Diff
+        if: steps.files.outputs.flowB != ''
+        uses: Snowflake-Labs/snowflake-flow-diff@v0
+        with:
+          flowA: ${{ steps.files.outputs.flowA }}
+          flowB: ${{ steps.files.outputs.flowB }}
+          checkstyle: true
