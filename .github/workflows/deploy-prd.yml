@@ -1,11 +1,11 @@
-name: Deploy DEV
+name: Deploy PRD
 
 on:
   push:
-    branches: [dev]
+    branches: [prd]
     paths:
       - 'flows/**'
-      - 'environments/dev/config.yaml'
+      - 'environments/prd/config.yaml'
 
   workflow_dispatch:
 
@@ -15,12 +15,12 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: prd
 
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: dev
+          ref: prd
           fetch-depth: 0
 
       - name: Set up Python
@@ -42,7 +42,7 @@ jobs:
           NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
         run: |
           cd scripts/cd
-          python describe_live_state.py ../../environments/dev/config.yaml > /tmp/live-state.json
+          python describe_live_state.py ../../environments/prd/config.yaml > /tmp/live-state.json
 
       - name: Compute diff
         env:
@@ -53,7 +53,7 @@ jobs:
           NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
         run: |
           cd scripts/cd
-          python diff_live.py /tmp/live-state.json ../../environments/dev/config.yaml > /tmp/live-diff.json
+          python diff_live.py /tmp/live-state.json ../../environments/prd/config.yaml > /tmp/live-diff.json
           python translate_live_diff.py /tmp/live-diff.json > /tmp/changes.json
           echo "--- Change Plan ---"
           cat /tmp/changes.json
@@ -70,4 +70,4 @@ jobs:
           GH_VARS_JSON: ${{ toJSON(vars) }}
         run: |
           cd scripts/cd
-          python orchestrate.py /tmp/changes.json ../../environments/dev/config.yaml
+          python orchestrate.py /tmp/changes.json ../../environments/prd/config.yaml
