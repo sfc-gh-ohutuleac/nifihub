@@ -13,21 +13,53 @@ permissions:
   contents: read
 
 jobs:
-  deploy-dev:
+  deploy:
     runs-on: ubuntu-latest
     environment: dev
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+          fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2.0
 
       - name: Install dependencies
         run: pip install -r scripts/cd/requirements-cd.txt
 
-      - name: Run CD pipeline
+      - name: Describe live state
+        env:
+          SNOWFLAKE_ACCOUNT_URL: ${{ vars.SNOWFLAKE_ACCOUNT_URL }}
+          SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
+          SNOWFLAKE_PAT: ${{ secrets.SNOWFLAKE_PAT }}
+          SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+          NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
+        run: |
+          cd scripts/cd
+          python describe_live_state.py ../../environments/dev/config.yaml > /tmp/live-state.json
+
+      - name: Compute diff
+        env:
+          SNOWFLAKE_ACCOUNT_URL: ${{ vars.SNOWFLAKE_ACCOUNT_URL }}
+          SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
+          SNOWFLAKE_PAT: ${{ secrets.SNOWFLAKE_PAT }}
+          SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+          NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
+        run: |
+          cd scripts/cd
+          python diff_live.py /tmp/live-state.json ../../environments/dev/config.yaml > /tmp/live-diff.json
+          python translate_live_diff.py /tmp/live-diff.json > /tmp/changes.json
+          echo "--- Change Plan ---"
+          cat /tmp/changes.json
+
+      - name: Apply changes
         env:
           SNOWFLAKE_ACCOUNT_URL: ${{ vars.SNOWFLAKE_ACCOUNT_URL }}
           SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
@@ -35,5 +67,8 @@ jobs:
           SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
           NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
           NIFIHUB_REGISTRY_PAT: ${{ secrets.NIFIHUB_REGISTRY_PAT }}
-          GH_SECRETS_JSON: '{"NIFIHUB_REGISTRY_PAT":"${{ secrets.NIFIHUB_REGISTRY_PAT }}"}'
-        run: python scripts/run-cd.py environments/dev/config.yaml
+          GH_SECRETS_JSON: ${{ toJSON(secrets) }}
+          GH_VARS_JSON: ${{ toJSON(vars) }}
+        run: |
+          cd scripts/cd
+          python orchestrate.py /tmp/changes.json ../../environments/dev/config.yaml
