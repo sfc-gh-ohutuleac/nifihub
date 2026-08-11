@@ -348,7 +348,7 @@
           "Batch Size": "1",
           "Unique FlowFiles": "false",
           "Mime Type": "application/json",
-          "Custom Text": "{\"message\": \"Hello from NiFi Hub\", \"source\": \"GenerateFlowFile\", \"runtime\": \"${hostname(true)}\", \"timestamp\": \"${now():format('yyyy-MM-dd HH:mm:ss')}\"}",
+          "Custom Text": "{\"message\": \"Hello World from NiFi Hub\", \"source\": \"GenerateFlowFile\", \"runtime\": \"${hostname(true)}\", \"timestamp\": \"${now():format('yyyy-MM-dd HH:mm:ss')}\"}",
           "Character Set": "UTF-8",
           "Data Format": "Text"
         },
