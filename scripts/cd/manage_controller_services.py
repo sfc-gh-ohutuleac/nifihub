@@ -113,6 +113,7 @@ def _properties_match(cs, desired_props):
 
 def reconcile_controller_services(services, runtime_url, nifi_pat, nifi_auth=None):
     """Idempotent reconcile: create missing services, update mismatched properties, ensure all are ENABLED."""
+    print(f"[cs] Reconciling {len(services)} controller service(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     for svc_spec in services:
         name = svc_spec["name"]
@@ -139,6 +140,7 @@ def reconcile_controller_services(services, runtime_url, nifi_pat, nifi_auth=Non
 
 def delete_controller_services(services, runtime_url, nifi_pat, nifi_auth=None):
     """Disable and delete controller services."""
+    print(f"[cs] Deleting {len(services)} controller service(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     for svc_spec in services:
         name = svc_spec["name"]
@@ -196,6 +198,7 @@ def _create_root_pg(svc_spec):
 
 def reconcile_root_pg_controller_services(services, runtime_url, nifi_pat, nifi_auth=None):
     """Idempotent reconcile for root process group-scoped controller services."""
+    print(f"[cs] Reconciling {len(services)} root PG controller service(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     for svc_spec in services:
         name = svc_spec["name"]
@@ -222,6 +225,7 @@ def reconcile_root_pg_controller_services(services, runtime_url, nifi_pat, nifi_
 
 def delete_root_pg_controller_services(services, runtime_url, nifi_pat, nifi_auth=None):
     """Disable and delete root process group-scoped controller services."""
+    print(f"[cs] Deleting {len(services)} root PG controller service(s)...", file=sys.stderr)
     configure_nifi(runtime_url, pat=nifi_pat, nifi_auth=nifi_auth)
     for svc_spec in services:
         name = svc_spec["name"]

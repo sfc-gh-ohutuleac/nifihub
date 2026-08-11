@@ -123,6 +123,7 @@ def _bind_asset_to_parameter(context_id, param_name, param_dto, asset_id, asset_
 
 
 def reconcile_flow_assets(pg_id, assets_spec, pg_name=""):
+    print(f"[assets] Reconciling assets for '{pg_name}'...", file=sys.stderr)
     if not assets_spec:
         return
 
@@ -168,6 +169,7 @@ def reconcile_flow_assets(pg_id, assets_spec, pg_name=""):
 
 
 def reconcile_assets(flows_with_assets, runtime_url, nifi_pat):
+    print(f"[assets] Reconciling assets for {len(flows_with_assets)} flow(s)...", file=sys.stderr)
     configure_nifi(runtime_url, nifi_pat)
     for flow_spec, pg_id in flows_with_assets:
         assets = flow_spec.get("assets")

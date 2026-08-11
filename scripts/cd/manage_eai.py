@@ -77,6 +77,7 @@ def eai_name_for_runtime(runtime_name):
 
 
 def create_network_rule(name, rule_type, mode, values, database, schema, **kwargs):
+    print(f"[eai] Creating network rule '{name}'...", file=sys.stderr)
     value_list = ", ".join(f"'{v}'" for v in values)
     sql = (
         f"CREATE OR REPLACE NETWORK RULE {fqn(database, schema, name)} "
@@ -88,6 +89,7 @@ def create_network_rule(name, rule_type, mode, values, database, schema, **kwarg
 
 
 def alter_network_rule(name, values, database, schema, **kwargs):
+    print(f"[eai] Altering network rule '{name}'...", file=sys.stderr)
     value_list = ", ".join(f"'{v}'" for v in values)
     sql = (
         f"ALTER NETWORK RULE IF EXISTS {fqn(database, schema, name)} SET "
@@ -99,6 +101,7 @@ def alter_network_rule(name, values, database, schema, **kwargs):
 
 
 def drop_network_rule(name, database, schema, **kwargs):
+    print(f"[eai] Dropping network rule '{name}'...", file=sys.stderr)
     sql = f"DROP NETWORK RULE IF EXISTS {fqn(database, schema, name)}"
     print(f"[eai] Dropping network rule {name}...")
     snow_sql(sql, database=database, schema=schema, **kwargs)
@@ -114,6 +117,7 @@ def eai_exists(name, **kwargs):
 
 
 def create_eai(name, network_rule_fqns, database, schema, grant_to_role=None, **kwargs):
+    print(f"[eai] Creating external access integration '{name}'...", file=sys.stderr)
     rules = ", ".join(network_rule_fqns)
     if eai_exists(name, **kwargs):
         sql = (
@@ -139,6 +143,7 @@ def create_eai(name, network_rule_fqns, database, schema, grant_to_role=None, **
 
 
 def drop_eai(name, **kwargs):
+    print(f"[eai] Dropping external access integration '{name}'...", file=sys.stderr)
     sql = f"DROP EXTERNAL ACCESS INTEGRATION IF EXISTS {name}"
     print(f"[eai] Dropping EAI {name}...")
     snow_sql(sql, **kwargs)
@@ -146,6 +151,7 @@ def drop_eai(name, **kwargs):
 
 
 def create_runtime_eai(runtime_name, custom_network_rules, database, schema, execute_as_role=None, **kwargs):
+    print(f"[eai] Creating EAI for runtime '{runtime_name}'...", file=sys.stderr)
     registry_nr = namespaced_nr_name(runtime_name, REGISTRY_NR_BASE_NAME)
     create_network_rule(
         registry_nr, "HOST_PORT", "EGRESS", REGISTRY_NR_VALUES,
@@ -165,6 +171,7 @@ def create_runtime_eai(runtime_name, custom_network_rules, database, schema, exe
 
 
 def delete_runtime_eai(runtime_name, custom_network_rules, database, schema, **kwargs):
+    print(f"[eai] Deleting EAI for runtime '{runtime_name}'...", file=sys.stderr)
     eai = eai_name_for_runtime(runtime_name)
     drop_eai(eai, **kwargs)
     registry_nr = namespaced_nr_name(runtime_name, REGISTRY_NR_BASE_NAME)
