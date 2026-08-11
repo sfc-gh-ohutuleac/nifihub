@@ -191,9 +191,11 @@ def main():
     with open(sys.argv[1]) as f:
         live_diff = json.load(f)
 
+    print("[translate] Converting diff into executable change actions...", file=sys.stderr)
     result = translate(live_diff)
     json.dump(result, sys.stdout, indent=2)
     print()
+    print("[translate] Done.", file=sys.stderr)
 
 
 if __name__ == "__main__":

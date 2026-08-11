@@ -579,10 +579,19 @@ def main():
     live_state_path = sys.argv[1]
     config_path = sys.argv[2]
 
+    print(f"[diff] Comparing live state against desired config: {config_path}", file=sys.stderr)
     with open(live_state_path) as f:
         live_state = json.load(f)
 
     result = diff_live(live_state, config_path)
+
+    deps = result.get("deployments", {})
+    n_create = len(deps.get("to_create", []))
+    n_modify = len(deps.get("to_modify", []))
+    n_delete = len(deps.get("to_delete", []))
+    n_unchanged = len(deps.get("unchanged", []))
+    print(f"[diff] Result: {n_create} to create, {n_modify} to modify, {n_delete} to delete, {n_unchanged} unchanged", file=sys.stderr)
+
     json.dump(result, sys.stdout, indent=2)
     print()
 

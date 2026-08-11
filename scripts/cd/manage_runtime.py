@@ -63,6 +63,7 @@ def fqn(database, schema, name):
 def create_runtime(name, deployment, database, schema, node_type, min_nodes,
                    max_nodes, execute_as_role, eai_names=None,
                    display_name=None, comment=None, **kwargs):
+    print(f"[runtime] Creating runtime '{name}' in deployment '{deployment}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     sql = (
         f"CREATE OPENFLOW RUNTIME {runtime_fqn} "
@@ -128,6 +129,7 @@ def wait_runtime_status(name, database, schema, target_statuses, timeout=600, **
 
 
 def alter_runtime(name, database, schema, changed_fields, eai_names=None, **kwargs):
+    print(f"[runtime] Altering runtime '{name}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     set_clauses = []
     alterable = ("min_nodes", "max_nodes", "execute_as_role", "display_name", "comment")
@@ -151,6 +153,7 @@ def alter_runtime(name, database, schema, changed_fields, eai_names=None, **kwar
 
 
 def suspend_runtime(name, database, schema, **kwargs):
+    print(f"[runtime] Suspending runtime '{name}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     desc = describe_runtime(name, database, schema, **kwargs)
     status = (desc.get("status") or desc.get("STATUS")) if desc else None
@@ -163,6 +166,7 @@ def suspend_runtime(name, database, schema, **kwargs):
 
 
 def resume_runtime(name, database, schema, **kwargs):
+    print(f"[runtime] Resuming runtime '{name}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     desc = describe_runtime(name, database, schema, **kwargs)
     status = (desc.get("status") or desc.get("STATUS")) if desc else None
@@ -175,6 +179,7 @@ def resume_runtime(name, database, schema, **kwargs):
 
 
 def terminate_runtime(name, database, schema, **kwargs):
+    print(f"[runtime] Terminating runtime '{name}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     print(f"[runtime] Terminating {runtime_fqn}...")
     snow_sql(f"ALTER OPENFLOW RUNTIME {runtime_fqn} TERMINATE", **kwargs)
@@ -182,6 +187,7 @@ def terminate_runtime(name, database, schema, **kwargs):
 
 
 def drop_runtime(name, database, schema, **kwargs):
+    print(f"[runtime] Dropping runtime '{name}'...", file=sys.stderr)
     runtime_fqn = fqn(database, schema, name)
     print(f"[runtime] Dropping {runtime_fqn}...")
     snow_sql(f"DROP OPENFLOW RUNTIME IF EXISTS {runtime_fqn}", **kwargs)
@@ -189,6 +195,7 @@ def drop_runtime(name, database, schema, **kwargs):
 
 
 def delete_runtime(name, database, schema, **kwargs):
+    print(f"[runtime] Deleting runtime '{name}' (suspend → terminate → drop)...", file=sys.stderr)
     suspend_runtime(name, database, schema, **kwargs)
     terminate_runtime(name, database, schema, **kwargs)
     drop_runtime(name, database, schema, **kwargs)

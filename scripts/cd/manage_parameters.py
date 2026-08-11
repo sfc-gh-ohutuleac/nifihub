@@ -160,6 +160,7 @@ def reconcile_flow_parameters(pg_id, desired_params, pg_name=""):
     Parameters are specified without context — the context is resolved automatically.
     desired_params: dict of {param_name: value} where value=None clears the parameter.
     """
+    print(f"[params] Reconciling parameters for '{pg_name}'...", file=sys.stderr)
     if not desired_params:
         return
 
@@ -198,6 +199,7 @@ def reconcile_flow_parameters(pg_id, desired_params, pg_name=""):
 
 def reconcile_parameters(flows_with_params, runtime_url, nifi_pat):
     """Reconcile parameters for all flows that declare a parameters section."""
+    print(f"[params] Reconciling parameters for {len(flows_with_params)} flow(s)...", file=sys.stderr)
     configure_nifi(runtime_url, nifi_pat)
     for flow_spec, pg_id in flows_with_params:
         desired = flow_spec.get("parameters")
@@ -217,6 +219,7 @@ def _find_parameter_context_by_name(name):
 
 
 def add_inherited_parameter_contexts(pg_id, context_names, pg_name=""):
+    print(f"[params] Adding {len(context_names)} inherited context(s) to '{pg_name}'...", file=sys.stderr)
     if not context_names:
         return
     pg = nipyapi.nifi.ProcessGroupsApi().get_process_group(id=pg_id)
@@ -282,6 +285,7 @@ def add_inherited_parameter_contexts(pg_id, context_names, pg_name=""):
 
 def apply_parameter_overrides(pg_id, overrides, pg_name=""):
     """Add/update parameters in the flow's DIRECT parameter context to shadow inherited values."""
+    print(f"[params] Applying parameter overrides to '{pg_name}'...", file=sys.stderr)
     if not overrides:
         return
 

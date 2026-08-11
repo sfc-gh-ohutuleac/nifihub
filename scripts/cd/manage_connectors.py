@@ -42,6 +42,7 @@ def describe_connector(name, database, schema, **kwargs):
 
 def create_connector(name, runtime_name, database, schema, definition,
                      display_name=None, comment=None, **kwargs):
+    print(f"[connector] Creating connector '{name}' on runtime '{runtime_name}'...", file=sys.stderr)
     connector_fqn = fqn(database, schema, name)
     runtime_fqn = fqn(database, schema, runtime_name)
     sql = (
@@ -161,6 +162,7 @@ def wait_for_connector(name, database, schema, target_status, timeout=600, **kwa
 
 
 def start_connector(name, database, schema, **kwargs):
+    print(f"[connector] Starting connector '{name}'...", file=sys.stderr)
     connector_fqn = fqn(database, schema, name)
     desc = describe_connector(name, database, schema, **kwargs)
     status = _get_status(desc)
@@ -173,6 +175,7 @@ def start_connector(name, database, schema, **kwargs):
 
 
 def stop_connector(name, database, schema, **kwargs):
+    print(f"[connector] Stopping connector '{name}'...", file=sys.stderr)
     connector_fqn = fqn(database, schema, name)
     desc = describe_connector(name, database, schema, **kwargs)
     status = _get_status(desc)
@@ -195,6 +198,7 @@ def stop_connector(name, database, schema, **kwargs):
 
 
 def delete_connector(name, database, schema, **kwargs):
+    print(f"[connector] Deleting connector '{name}'...", file=sys.stderr)
     connector_fqn = fqn(database, schema, name)
     print(f"[connector] Terminating {connector_fqn}...")
     snow_sql(f"ALTER OPENFLOW CONNECTOR {connector_fqn} TERMINATE", **kwargs)

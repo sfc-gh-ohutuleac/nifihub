@@ -136,6 +136,7 @@ def diff_flows(old_flows, new_flows):
 
 
 def diff_environments(old_path, new_path):
+    print(f"[diff-env] Diffing environment configs...", file=sys.stderr)
     old_cfg = load_yaml(old_path)
     new_cfg = load_yaml(new_path)
 
@@ -193,6 +194,7 @@ def main():
 
     old_path = sys.argv[1]
     new_path = sys.argv[2]
+    print(f"[diff-env] Comparing old config '{old_path}' with new config '{new_path}'...", file=sys.stderr)
     changes = diff_environments(old_path, new_path)
     json.dump(changes, sys.stdout, indent=2)
 
