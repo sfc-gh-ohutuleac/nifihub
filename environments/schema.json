@@ -50,6 +50,11 @@
             "type": "string",
             "maxLength": 1024
           },
+          "provision": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the CD pipeline will create this deployment and its runtimes if they do not exist. Default: false (fail if not found)."
+          },
           "runtimes": {
             "type": "array",
             "items": {
@@ -131,6 +136,11 @@
           "type": "boolean",
           "description": "When false, the CD pipeline skips NiFi-level reconciliation (flows, parameters, registries, controller services) for this runtime. The runtime infrastructure (SQL-level) is still managed. Defaults to true.",
           "default": true
+        },
+        "provision": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, the CD pipeline will create this runtime if it does not exist. Default: false (fail if not found)."
         },
         "sensitive_param_pattern": {
           "type": "string",

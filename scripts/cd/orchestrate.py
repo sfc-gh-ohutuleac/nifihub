@@ -19,6 +19,7 @@ import json
 import os
 import sys
 import traceback
+import yaml
 from collections import defaultdict
 
 from manage_deployment import (
@@ -415,11 +416,19 @@ def _delete_connectors(connectors, database, schema, conn):
             print(f"[connector] {c['name']} not found — skipping delete")
 
 
-def apply_deployment_creates(created_deps, conn, errors):
+def apply_deployment_creates(created_deps, conn, errors, provision_map=None):
+    provision_map = provision_map or {}
     for dep in created_deps:
+        provision = provision_map.get(dep["name"].upper(), False)
         runtimes = dep.get("runtimes_to_create", [])
         som_needed = any(_has_som_api(rt) for rt in runtimes)
         if som_needed:
+            if not provision:
+                msg = (f"Deployment '{dep['name']}' needs to be created but 'provision: true' is not set. "
+                       f"Add 'provision: true' to the deployment block in config.yaml.")
+                print(f"[orchestrate] ERROR: {msg}", file=sys.stderr)
+                errors.append(msg)
+                continue
             create_deployment(
                 dep["name"], dep.get("deployment_type", "SNOWFLAKE"),
                 display_name=dep.get("display_name"),
@@ -439,6 +448,11 @@ def apply_deployment_creates(created_deps, conn, errors):
 
 
 def apply_runtime_create(deployment_name, rt, conn):
+    provision = rt.get("provision", False)
+    if not provision and _has_som_api(rt):
+        msg = (f"Runtime '{rt['name']}' needs to be created but 'provision: true' is not set. "
+               f"Add 'provision: true' to the runtime block in config.yaml.")
+        raise RuntimeError(msg)
     print(f"[orchestrate] Creating runtime '{rt['name']}' in deployment '{deployment_name}'...", file=sys.stderr)
     database = rt["database"]
     schema = rt["schema"]
@@ -483,8 +497,10 @@ def apply_runtime_create(deployment_name, rt, conn):
     _reconcile_connectors(rt, conn)
 
 
-def apply_deployment_modifications(modified_deps, conn, errors):
+def apply_deployment_modifications(modified_deps, conn, errors, provision_map=None):
+    provision_map = provision_map or {}
     for dep in modified_deps:
+        provision = provision_map.get(dep["name"].upper(), False)
         rtc = dep.get("runtime_changes", {})
         all_rts = (rtc.get("created", [])
                    + [m["new"] for m in rtc.get("modified", [])]
@@ -492,10 +508,16 @@ def apply_deployment_modifications(modified_deps, conn, errors):
         som_needed = any(_has_som_api(rt) for rt in all_rts)
 
         if som_needed and not deployment_exists(dep["name"], conn):
-            print(f"[orchestrate] Deployment {dep['name']} not found — falling back to CREATE")
+            if not provision:
+                msg = (f"Deployment '{dep['name']}' does not exist and 'provision: true' is not set. "
+                       f"Add 'provision: true' to the deployment block in config.yaml.")
+                print(f"[orchestrate] ERROR: {msg}", file=sys.stderr)
+                errors.append(msg)
+                continue
+            print(f"[orchestrate] Deployment '{dep['name']}' not found — provisioning (provision: true)", file=sys.stderr)
             all_create = rtc.get("created", []) + [m["new"] for m in rtc.get("modified", [])]
             fallback = {**dep, "runtimes_to_create": all_create}
-            apply_deployment_creates([fallback], conn, errors)
+            apply_deployment_creates([fallback], conn, errors, provision_map=provision_map)
             continue
 
         if som_needed and dep.get("changed_fields"):
@@ -682,6 +704,14 @@ def orchestrate(changes_path, config_path):
     with open(changes_path) as f:
         changes = json.load(f)
 
+    with open(config_path) as f:
+        config = yaml.safe_load(f) or {}
+
+    # Build provision flag per deployment from config
+    provision_map = {}
+    for dep_cfg in config.get("deployments", []):
+        provision_map[dep_cfg["name"].upper()] = dep_cfg.get("provision", False)
+
     conn = get_conn()
     deployments = changes.get("deployments", {})
     errors = []
@@ -691,8 +721,8 @@ def orchestrate(changes_path, config_path):
     n_delete = len(deployments.get("deleted", []))
     print(f"[orchestrate] Applying changes: {n_create} deployment(s) to create, {n_modify} to modify, {n_delete} to delete", file=sys.stderr)
 
-    apply_deployment_creates(deployments.get("created", []), conn, errors)
-    apply_deployment_modifications(deployments.get("modified", []), conn, errors)
+    apply_deployment_creates(deployments.get("created", []), conn, errors, provision_map=provision_map)
+    apply_deployment_modifications(deployments.get("modified", []), conn, errors, provision_map=provision_map)
     apply_deployment_deletes(deployments.get("deleted", []), conn, errors)
 
     if errors:
