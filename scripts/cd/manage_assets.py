@@ -15,6 +15,7 @@
 
 #!/usr/bin/env python3
 import hashlib
+import sys
 import tempfile
 import time
 import urllib.request
