@@ -65,6 +65,7 @@ jobs:
           token = "${{ secrets.SNOWFLAKE_PAT }}"
           role = "${{ vars.SNOWFLAKE_ROLE }}"
           EOF
+          chmod 0600 ~/.snowflake/config.toml
 
       - name: Describe live state
         env:
