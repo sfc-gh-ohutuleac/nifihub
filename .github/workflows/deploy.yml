@@ -1,26 +1,47 @@
-name: Deploy DEV
+name: Deploy Openflow
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, qua, prd]
     paths:
       - 'flows/**'
-      - 'environments/dev/config.yaml'
+      - 'environments/*/config.yaml'
 
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (dev, qua, prd). Leave empty to auto-detect from branch.'
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  resolve:
     runs-on: ubuntu-latest
-    environment: dev
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+    steps:
+      - name: Resolve environment from branch
+        id: env
+        run: |
+          if [ -n "${{ inputs.environment }}" ]; then
+            echo "environment=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          else
+            BRANCH="${GITHUB_REF_NAME}"
+            echo "environment=$BRANCH" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: resolve
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve.outputs.environment }}
 
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: dev
+          ref: ${{ needs.resolve.outputs.environment }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -33,6 +54,18 @@ jobs:
           pip install snowflake-cli
           pip install -r scripts/cd/requirements-cd.txt
 
+      - name: Configure Snowflake connection
+        run: |
+          mkdir -p ~/.snowflake
+          cat > ~/.snowflake/config.toml << EOF
+          [connections.default]
+          account = "${{ vars.SNOWFLAKE_ACCOUNT }}"
+          user = "${{ vars.SNOWFLAKE_USER }}"
+          authenticator = "oauth"
+          token = "${{ secrets.SNOWFLAKE_PAT }}"
+          role = "${{ vars.SNOWFLAKE_ROLE }}"
+          EOF
+
       - name: Describe live state
         env:
           SNOWFLAKE_ACCOUNT_URL: ${{ vars.SNOWFLAKE_ACCOUNT_URL }}
@@ -41,8 +74,10 @@ jobs:
           SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
           NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
         run: |
+          ENV="${{ needs.resolve.outputs.environment }}"
+          echo "--- Deploying environment: $ENV ---"
           cd scripts/cd
-          python describe_live_state.py ../../environments/dev/config.yaml > /tmp/live-state.json
+          python describe_live_state.py "../../environments/${ENV}/config.yaml" > /tmp/live-state.json
 
       - name: Compute diff
         env:
@@ -52,8 +87,9 @@ jobs:
           SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
           NIFI_RUNTIME_PAT: ${{ secrets.NIFI_RUNTIME_PAT }}
         run: |
+          ENV="${{ needs.resolve.outputs.environment }}"
           cd scripts/cd
-          python diff_live.py /tmp/live-state.json ../../environments/dev/config.yaml > /tmp/live-diff.json
+          python diff_live.py /tmp/live-state.json "../../environments/${ENV}/config.yaml" > /tmp/live-diff.json
           python translate_live_diff.py /tmp/live-diff.json > /tmp/changes.json
           echo "--- Change Plan ---"
           cat /tmp/changes.json
@@ -69,5 +105,6 @@ jobs:
           GH_SECRETS_JSON: ${{ toJSON(secrets) }}
           GH_VARS_JSON: ${{ toJSON(vars) }}
         run: |
+          ENV="${{ needs.resolve.outputs.environment }}"
           cd scripts/cd
-          python orchestrate.py /tmp/changes.json ../../environments/dev/config.yaml
+          python orchestrate.py /tmp/changes.json "../../environments/${ENV}/config.yaml"
